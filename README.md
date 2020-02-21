@@ -19,3 +19,5 @@ samples, guidance on mobile development, and a full API reference.
 ## Icons
 
 https://thenounproject.com/search/?q=emoji%20happy&i=2010435
+
+Emojis by Path Lord from the Noun Project

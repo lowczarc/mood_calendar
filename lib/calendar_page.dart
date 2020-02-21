@@ -1,41 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter_calendar_carousel/flutter_calendar_carousel.dart' show CalendarCarousel;
-
-enum Mood {
-  veryGood,
-  good,
-  meh,
-  bad,
-  veryBad,
-}
-
-Color mood_color(Mood mood) {
-  switch (mood) {
-    case Mood.veryGood: {
-      return Colors.green[600];
-    }
-    case Mood.good: {
-      return Colors.lightGreen[400];
-    }
-    case Mood.meh: {
-      return Colors.blue[400];
-    }
-    case Mood.bad: {
-      return Colors.orange[400];
-    }
-    case Mood.veryBad: {
-      return Colors.red[400];
-    }
-  }
-}
+import 'add_entry.dart';
+import 'mood.dart';
 
 class MoodCounter extends StatelessWidget {
   MoodCounter({this.dayMoods});
   final Map<String, Mood> dayMoods;
 
-  @override build(BuildContext context) {
+  @override
+  Widget build(BuildContext context) {
     return Row(
       children: Mood.values.map((mood) =>
         Container(
@@ -144,7 +118,16 @@ class _CalendarPageState extends State<CalendarPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: Text(widget.title, style: TextStyle(color: Theme.of(context).accentColor)),
+      ),
+      floatingActionButton: FloatingActionButton(
+        child: Icon(Icons.add),
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => AddEntryPage()),
+          );
+        },
       ),
       body: Container(
         child: Column(
@@ -169,6 +152,7 @@ class _CalendarPageState extends State<CalendarPage> {
 
               return date.year == _currentMonth.year && date.month == _currentMonth.month;
             }).toList())),
+
           ],
         ),
         margin: const EdgeInsets.symmetric(horizontal: 25.0, vertical: 10.0),
