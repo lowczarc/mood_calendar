@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter_calendar_carousel/flutter_calendar_carousel.dart' show CalendarCarousel;
 
 enum Mood {
@@ -13,20 +14,51 @@ enum Mood {
 Color mood_color(Mood mood) {
   switch (mood) {
     case Mood.veryGood: {
-      return Colors.greenAccent;
+      return Colors.green[600];
     }
     case Mood.good: {
-      return Colors.green;
+      return Colors.lightGreen[400];
     }
     case Mood.meh: {
-      return Colors.blue;
+      return Colors.blue[400];
     }
     case Mood.bad: {
-      return Colors.orange;
+      return Colors.orange[400];
     }
     case Mood.veryBad: {
-      return Colors.red;
+      return Colors.red[400];
     }
+  }
+}
+
+class MoodCounter extends StatelessWidget {
+  MoodCounter({this.dayMoods});
+  final Map<String, Mood> dayMoods;
+
+  @override build(BuildContext context) {
+    return Row(
+      children: Mood.values.map((mood) =>
+        Container(
+          child: Container(
+              child: Center(
+                child: Text(
+                  dayMoods.entries.fold(0, (acc, elem) => acc + (elem.value == mood ? 1 : 0)).toString(),
+                  style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold, color: mood_color(mood)),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              width: 40,
+              margin: const EdgeInsets.symmetric(vertical: 5.0),
+          ),
+          decoration: BoxDecoration(
+              border: Border(bottom: BorderSide(color: mood_color(mood), width: 4.0)),
+          ),
+          width: 40,
+          margin: const EdgeInsets.all(10.0),
+        )
+      ).toList(),
+      mainAxisAlignment: MainAxisAlignment.center,
+    );
   }
 }
 
@@ -60,11 +92,12 @@ class CalendarDay extends StatelessWidget {
   }
 }
 
-class CalendarPage extends StatelessWidget {
-  CalendarPage({this.title});
+
+class CalendarPage extends StatefulWidget {
+  CalendarPage({this.title, this.dayMoods});
   final String title;
-  final now = new DateTime.now();
-  final Map dayMoods = { '2020-02-15': Mood.veryGood, '2020-02-01': Mood.good, '2020-02-21': Mood.meh, '2020-02-18': Mood.bad, '2020-02-05': Mood.veryBad };
+  final DateTime now = new DateTime.now();
+  final Map<String, Mood> dayMoods; 
 
   Widget customDayBuilder(
     bool isSelectable,
@@ -87,13 +120,13 @@ class CalendarPage extends StatelessWidget {
         );
       } else if (!isThisMonthDay || day.millisecondsSinceEpoch > now.millisecondsSinceEpoch) {
         return CalendarDay(
-          child: Text(day.day.toString(), style: TextStyle(color: Colors.grey)),
+          child: Text(day.day.toString(), style: TextStyle(color: Colors.grey, fontSize: 12.0)),
           color: Colors.transparent,
           isToday: false,
         );
       } else {
         return CalendarDay(
-          child: Text(day.day.toString(), style: TextStyle(color: textStyle.color)),
+          child: Text(day.day.toString(), style: TextStyle(color: textStyle.color, fontSize: 12.0)),
           color: color,
           isToday: false,
         );
@@ -101,10 +134,17 @@ class CalendarPage extends StatelessWidget {
   }
 
   @override
+  _CalendarPageState createState() => _CalendarPageState();
+}
+
+class _CalendarPageState extends State<CalendarPage> {
+  DateTime _currentMonth = DateTime(DateTime.now().year, DateTime.now().month);
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(title),
+        title: Text(widget.title),
       ),
       body: Container(
         child: Column(
@@ -118,10 +158,17 @@ class CalendarPage extends StatelessWidget {
               todayButtonColor: Colors.transparent,
               dayPadding: 1.0,
               firstDayOfWeek: 1,
+              onCalendarChanged: (date) => setState(() {
+                _currentMonth = date;
+              }),
               pageScrollPhysics: NeverScrollableScrollPhysics(),
-              customDayBuilder: this.customDayBuilder,
+              customDayBuilder: widget.customDayBuilder,
             ),
-            Text('AAA'),
+            MoodCounter(dayMoods: Map.fromEntries(widget.dayMoods.entries.where((elem) {
+              final DateTime date = DateFormat('yyyy-MM-dd').parse(elem.key);
+
+              return date.year == _currentMonth.year && date.month == _currentMonth.month;
+            }).toList())),
           ],
         ),
         margin: const EdgeInsets.symmetric(horizontal: 25.0, vertical: 10.0),
