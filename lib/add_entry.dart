@@ -12,12 +12,22 @@ class AddEntryPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Add an entry'),
-      ),
-      body: Consumer<MoodListModel>(
-        builder: (context, moodList, child) => Column(
+    return Consumer<MoodListModel>(
+      builder: (context, moodList, child) => Scaffold(
+        appBar: AppBar(
+          title: Text('Add an entry'),
+          actions: <Widget>[
+            IconButton(
+              icon: Icon(Icons.delete_outline),
+              tooltip: 'Delete current entry',
+              onPressed: () {
+                moodList.update(day, null);
+                Navigator.pop(context);
+              }
+            ),
+          ],
+        ),
+        body: Column(
           children: <Widget>[
             Container(
               child: Column(

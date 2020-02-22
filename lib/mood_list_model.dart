@@ -14,8 +14,16 @@ class MoodListModel extends ChangeNotifier {
   void update(DateTime date, Mood mood) async {
     final String keyDateFormat = DateFormat('yyyy-MM-dd').format(date);
 
-    moodListStorage.update(keyDateFormat, (_) => mood, ifAbsent: () => mood);
-    await prefs.setString('moodList', jsonEncode(moodListStorage));
+    if (mood != null) {
+      moodListStorage.update(keyDateFormat, (_) => mood, ifAbsent: () => mood);
+    } else {
+      moodListStorage.remove(keyDateFormat);
+    }
+    await prefs.setString('moodList', jsonEncode(
+      Map.fromEntries(
+        moodListStorage.entries.map((elem) => MapEntry(elem.key, elem.value.toString()))
+      )
+    ));
     notifyListeners();
   }
 }

@@ -69,3 +69,12 @@ String mood_name(Mood mood) {
     }
   }
 }
+
+Mood parse_mood(String str) {
+  for (final mood in Mood.values) {
+    if (mood.toString() == str) {
+      return mood;
+    }
+  }
+  return null;
+}

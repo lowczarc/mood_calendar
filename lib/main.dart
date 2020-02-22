@@ -10,7 +10,11 @@ import 'mood_list_model.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final prefs = await SharedPreferences.getInstance();
-  final Map moodListInit = jsonDecode(prefs.getString('moodList') ?? "{}");
+  final Map moodListInit = Map.fromEntries(
+    jsonDecode(prefs.getString('moodList') ?? "{}")
+     .entries.map<MapEntry<String, dynamic>>((elem) => MapEntry(elem.key as String, parse_mood(elem.value)))
+  );
+
   return runApp(
     ChangeNotifierProvider(
       create: (context) => MoodListModel(prefs: prefs, moodListStorage: moodListInit),
@@ -20,7 +24,6 @@ void main() async {
 }
 
 class App extends StatelessWidget {
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -29,7 +32,7 @@ class App extends StatelessWidget {
         primaryColor: Colors.white,
         accentColor: Colors.teal,
       ),
-      home: CalendarPage(title: 'Calendar Mood'),
+      home: CalendarPage(title: 'Mood Calendar'),
     );
   }
 }
