@@ -1,4 +1,4 @@
-package com.example.mood_calendar
+package life.lancelot.mood_calendar
 
 import androidx.annotation.NonNull;
 import io.flutter.embedding.android.FlutterActivity
