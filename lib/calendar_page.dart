@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_calendar_carousel/flutter_calendar_carousel.dart' show CalendarCarousel;
+import 'package:provider/provider.dart';
 import 'add_entry.dart';
 import 'mood.dart';
+import 'mood_list_model.dart';
 
 class MoodCounter extends StatelessWidget {
   MoodCounter({this.dayMoods});
@@ -66,9 +68,22 @@ class CalendarDay extends StatelessWidget {
   }
 }
 
+class CalendarPage extends StatelessWidget {
+  CalendarPage({this.title});
+  final String title;
 
-class CalendarPage extends StatefulWidget {
-  CalendarPage({this.title, this.dayMoods});
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<MoodListModel>(
+      builder: (context, moodList, child) {
+        return CalendarPageInternal(title: title, dayMoods: moodList.moodList);
+      }
+    );
+  }
+}
+
+class CalendarPageInternal extends StatefulWidget {
+  CalendarPageInternal({this.title, this.dayMoods});
   final String title;
   final DateTime now = new DateTime.now();
   final Map<String, Mood> dayMoods; 
@@ -86,32 +101,27 @@ class CalendarPage extends StatefulWidget {
   ) {
     final String keyDateFormat = DateFormat('yyyy-MM-dd').format(day);
     final color = (dayMoods[keyDateFormat] != null) ? mood_color(dayMoods[keyDateFormat]) : Colors.transparent;
-    if (isToday) {
-        return CalendarDay(
-          child: Text(day.day.toString(), style: TextStyle(color: textStyle.color, fontSize: 12.0)),
-          color: color,
-          isToday: true,
-        );
-      } else if (!isThisMonthDay || day.millisecondsSinceEpoch > now.millisecondsSinceEpoch) {
-        return CalendarDay(
-          child: Text(day.day.toString(), style: TextStyle(color: Colors.grey, fontSize: 12.0)),
-          color: Colors.transparent,
-          isToday: false,
-        );
-      } else {
-        return CalendarDay(
-          child: Text(day.day.toString(), style: TextStyle(color: textStyle.color, fontSize: 12.0)),
-          color: color,
-          isToday: false,
-        );
-      }
+
+    if (!isToday && (!isThisMonthDay || day.millisecondsSinceEpoch > now.millisecondsSinceEpoch)) {
+      return CalendarDay(
+        child: Text(day.day.toString(), style: TextStyle(color: Colors.grey, fontSize: 12.0)),
+        color: Colors.transparent,
+        isToday: false,
+      );
+    } else {
+      return CalendarDay(
+        child: Text(day.day.toString(), style: TextStyle(color: textStyle.color, fontSize: 12.0)),
+        color: color,
+        isToday: isToday, 
+      );
+    }
   }
 
   @override
   _CalendarPageState createState() => _CalendarPageState();
 }
 
-class _CalendarPageState extends State<CalendarPage> {
+class _CalendarPageState extends State<CalendarPageInternal> {
   DateTime _currentMonth = DateTime(DateTime.now().year, DateTime.now().month);
 
   @override
@@ -125,7 +135,7 @@ class _CalendarPageState extends State<CalendarPage> {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => AddEntryPage()),
+            MaterialPageRoute(builder: (context) => AddEntryPage(day: widget.now)),
           );
         },
       ),
@@ -144,6 +154,14 @@ class _CalendarPageState extends State<CalendarPage> {
               onCalendarChanged: (date) => setState(() {
                 _currentMonth = date;
               }),
+              onDayPressed: (DateTime date, List _) {
+                if (date.millisecondsSinceEpoch <= widget.now.millisecondsSinceEpoch) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => AddEntryPage(day: date)),
+                  );
+                }
+              },
               pageScrollPhysics: NeverScrollableScrollPhysics(),
               customDayBuilder: widget.customDayBuilder,
             ),
